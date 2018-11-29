@@ -56,21 +56,34 @@ class Demodulador:
         ondaq[negativos] = -1
 
         # Faz uma subamostragem para obter os símbolos.
-        simbolos = ondaq[::self.modulador.L]
+        simbolos = ondaq[:ondaq.size - self.modulador.L:self.modulador.L]
 
-        return (sinald, sinali, ondaq, simbolos.astype(int))
+        return (sinald, sinali, ondaq, simbolos)
 
 
 class Canal:
 
-    def __init__(self, SNR):
+    def __init__(self, SNR, taps):
         self.SNR = SNR
+        self.taps = taps
 
     def processar(self, sinal):
 
         # Sinal processado pelo canal, representado por h.
         #h = np.concatenate((np.zeros(5), rayleigh.rvs(size=10)))
-        h = np.array([1])
+
+        # Rayleigh fading channel
+        #h = rayleigh.rvs(size=self.taps)/self.taps
+        #h = (1/np.sqrt(2)) * (np.random.randn(self.taps) + 1j * np.random.randn(self.taps))
+        #h = np.abs(h)
+
+        # Canal com desvanecimento (modelo de Clarke)
+        x = np.zeros(sinal.size)
+        y = np.zeros(sinal.size)
+
+        for i in np.arange(1, )
+
+        #h = np.array([1])
         sinalc = np.convolve(sinal, h)
 
         # Aplicando ruído gaussiano branco.

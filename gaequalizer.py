@@ -12,13 +12,15 @@ Fc = 10  # Frequência da portadora.
 Fs = 10 * Fc  # Frequência de amostragem.
 Tb = 1  # Largura de cada símbolo (em seg).
 
-SNRdB = 3  # Potência do sinal é duas vezes o dobro da potência do ruído.
+SNRdB = 300  # Potência do sinal é duas vezes o dobro da potência do ruído.
 SNR = 10.0 ** (SNRdB/10.0)
+
+TAPS = 80  # Número de elementos (caminhos) do canal.
 
 # Cria o modulador e o demodulador.
 modulador = Modulador(Fc, Fs, Tb)
 demodulador = Demodulador(modulador)
-canal = Canal(SNR)
+canal = Canal(SNR, TAPS)
 
 # Dados a serem enviados.
 dados = np.random.choice(np.array([0, 1]), size=(N))
@@ -35,18 +37,13 @@ sinalc = canal.processar(sinalm)
 # Demodula o sinal recebido.
 (sinald,  sinali, ondaq_recebida, simbolos_recebidos) = demodulador.processar(sinalc)
 
-dados_recebidos = simbolos_recebidos + 1
+dados_recebidos = ((simbolos_recebidos + 1)/2).astype(int)
 
-ondaq_recebida = ondaq_recebida[int(modulador.L/2):modulador.L:1]
+print(dados_recebidos)
+print(dados)
 
 # Calculando os erros de decisão.
-#erros = np.where(simbolos_enviados != simbolos_recebidos)
-
-#print(simbolos_enviados)
-#print(simbolos_recebidos)
-
 num_erros = np.sum(simbolos_enviados != simbolos_recebidos)
-
 BER = num_erros/simbolos_enviados.size
 
 print('Do total de {} bits, {} foram decodificados de formada errada.'.format(
@@ -54,8 +51,8 @@ print('Do total de {} bits, {} foram decodificados de formada errada.'.format(
 ))
 print('BER: {}'.format(BER))
 
-'''
 # Exibindo gráficos do transmissor.
+'''
 f1, (f1_ax1, f1_ax2, f1_ax3) = plt.subplots(3)
 f1.suptitle('Sinal enviado a partir do transmissor', fontsize=14)
 f1_ax1.stem(dados)
