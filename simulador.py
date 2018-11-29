@@ -40,25 +40,21 @@ class Demodulador:
         portadora = np.cos(2 * np.pi * self.modulador.Fc * t)
         sinald = np.multiply(sinalm, portadora)
 
-        # Integra para melhorar o formato da onda (opcional)
-        sinali = np.convolve(sinald, np.ones(self.modulador.L))
-        atraso = self.modulador.L
-
         # Estágio 2 (decisor)
 
-        ondaq = sinali.copy()
+        ondaq = sinald.copy()
 
         # Decide se é 1 ou -1 baseado no limiar 0.
-        positivos = (sinali > 0)
+        positivos = (sinald > 0)
         negativos = np.logical_not(positivos)
 
         ondaq[positivos] = 1
         ondaq[negativos] = -1
 
         # Faz uma subamostragem para obter os símbolos (ignorando o atraso).
-        simbolos = ondaq[atraso::self.modulador.L]
+        simbolos = ondaq[::self.modulador.L]
         
-        return (sinald, sinali, ondaq, simbolos.astype(int))
+        return (sinald, ondaq, simbolos.astype(int))
 
 
 class Canal:

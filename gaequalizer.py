@@ -11,7 +11,7 @@ Fc = 10  # Frequência da portadora.
 Fs = 10 * Fc  # Frequência de amostragem.
 Tb = 1  # Largura de cada símbolo (em seg).
 
-SNRdB = 0.001
+SNRdB = 0.01  # Potência do sinal é duas vezes o dobro da potência do ruído.
 SNR = 10.0 ** (SNRdB/10.0)
 
 # Cria o modulador e o demodulador.
@@ -20,7 +20,7 @@ demodulador = Demodulador(modulador)
 canal = Canal(SNR)
 
 # Dados a serem enviados.
-dados = np.random.choice(np.array([0, 1]), size=(10**4))
+dados = np.random.choice(np.array([0, 1]), size=(10000))
 
 # Criando símbols para o BPSK (-1 e 1).
 simbolos_enviados = 2*dados - 1
@@ -32,12 +32,12 @@ simbolos_enviados = 2*dados - 1
 sinalc = canal.processar(sinalm)
 
 # Demodula o sinal recebido.
-(sinald, sinali, ondaq_recebida, simbolos_recebidos) = demodulador.processar(sinalc)
+(sinald, ondaq_recebida, simbolos_recebidos) = demodulador.processar(sinalc)
 
 dados_recebidos = (dados + 1)/2
 
-# Exibindo gráficos do transmissor.
 '''
+# Exibindo gráficos do transmissor.
 f1, (f1_ax1, f1_ax2, f1_ax3) = plt.subplots(3)
 f1.suptitle('Sinal enviado a partir do transmissor', fontsize=14)
 f1_ax1.stem(dados)
@@ -56,8 +56,6 @@ f2_ax1.plot(sinalc)
 f2_ax1.set_title('Sinal recebido do canal')
 f2_ax2.plot(sinald)
 f2_ax2.set_title('Sinal demodulado')
-f2_ax3.plot(sinali)
-f2_ax3.set_title('Sinal integrado (com atraso)')
 f2_ax4.plot(ondaq_recebida)
 f2_ax4.set_title('Onda quadrada recebida')
 f2_ax5.stem(dados_recebidos)
