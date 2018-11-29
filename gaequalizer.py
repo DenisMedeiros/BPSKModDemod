@@ -2,34 +2,71 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
-from scipy import signal
-from random import random
-
 import matplotlib.pyplot as plt
+from simulador import Modulador, Demodulador, Canal
 
-## Dados a serem enviados.
+# Configurações.
 
-# Sequência de bits.
-data = np.random.choice(np.array([-1, 1]), size=(1, 3))
+Fc = 10  # Frequência da portadora.
+Fs = 10 * Fc  # Frequência de amostragem.
+Tb = 1  # Largura de cada símbolo (em seg).
 
-# Convertendo para onda quadrada.
-tp = np.arange(0, T*M, Ts)
+SNRdB = 0.001
+SNR = 10.0 ** (SNRdB/10.0)
 
-## Parâmetros da onda portadora.
+# Cria o modulador e o demodulador.
+modulador = Modulador(Fc, Fs, Tb)
+demodulador = Demodulador(modulador)
+canal = Canal(SNR)
 
-# Frequência da portadora.
-f = 1000
-T = 1/f
-# Frequência de amostragem da portadora (pelo menos a freq. de Nyquist).
-Fs = 100 * f
-Ts = 1/Fs
+# Dados a serem enviados.
+dados = np.random.choice(np.array([0, 1]), size=(10**4))
 
-M = 10
-n = M * data.size
-t = np.arange(0, n*T, Ts)
-carrier = np.cos(2*np.pi*f*t)
+# Criando símbols para o BPSK (-1 e 1).
+simbolos_enviados = 2*dados - 1
 
-plt.plot(carrier)
+# Modula os símbolos.
+(ondaq_enviada, sinalm) = modulador.processar(simbolos_enviados)
+
+# Processa pelo canal.
+sinalc = canal.processar(sinalm)
+
+# Demodula o sinal recebido.
+(sinald, sinali, ondaq_recebida, simbolos_recebidos) = demodulador.processar(sinalc)
+
+dados_recebidos = (dados + 1)/2
+
+# Exibindo gráficos do transmissor.
+'''
+f1, (f1_ax1, f1_ax2, f1_ax3) = plt.subplots(3)
+f1.suptitle('Sinal enviado a partir do transmissor', fontsize=14)
+f1_ax1.stem(dados)
+f1_ax1.set_title('Bits enviados')
+f1_ax2.plot(ondaq_enviada)
+f1_ax2.set_title('Onda quadrada gerada a partir dos símbolos')
+f1_ax3.plot(sinalm)
+f1_ax3.set_title('Sinal modulado')
+f1.subplots_adjust(hspace=1)
+
+
+# Exibindo gráficos do receptor.
+f2, (f2_ax1, f2_ax2, f2_ax3, f2_ax4, f2_ax5) = plt.subplots(5)
+f2.suptitle('Sinal recebido no receptor.', fontsize=14)
+f2_ax1.plot(sinalc)
+f2_ax1.set_title('Sinal recebido do canal')
+f2_ax2.plot(sinald)
+f2_ax2.set_title('Sinal demodulado')
+f2_ax3.plot(sinali)
+f2_ax3.set_title('Sinal integrado (com atraso)')
+f2_ax4.plot(ondaq_recebida)
+f2_ax4.set_title('Onda quadrada recebida')
+f2_ax5.stem(dados_recebidos)
+f2_ax5.set_title('Dados recebidos')
+f2.subplots_adjust(hspace=1)
+
 plt.show()
+'''
 
-
+erros = np.where(simbolos_enviados != simbolos_recebidos)
+BER = np.size(erros)/ondaq_enviada.size
+print('BER: {}'.format(BER))

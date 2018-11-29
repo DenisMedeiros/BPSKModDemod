@@ -1,5 +1,6 @@
 import numpy as np
 import scipy
+import matplotlib.pyplot as plt
 
 # Configuração do modulador.
 
@@ -56,9 +57,8 @@ class Demodulador:
 
         # Faz uma subamostragem para obter os símbolos (ignorando o atraso).
         simbolos = ondaq[atraso::self.modulador.L]
-
+        
         return (sinald, sinali, ondaq, simbolos.astype(int))
-
 
 
 class Canal:
@@ -77,5 +77,7 @@ class Canal:
         ruido_gaussiano = np.random.normal(0, desvio_padrao, sinal.size)
 
         # Aplica o ruído ao sinal.
-        sinal_ruidoso = sinal + ruido_gaussiano + 100
+        sinal_ruidoso = sinal + ruido_gaussiano
+
+        # Atenua o sinal.
         return sinal_ruidoso
