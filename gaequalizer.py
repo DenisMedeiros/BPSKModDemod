@@ -7,11 +7,12 @@ from simulador import Modulador, Demodulador, Canal
 
 # Configurações.
 
+N = 10000  # Número de símbolos a ser enviado.
 Fc = 10  # Frequência da portadora.
 Fs = 10 * Fc  # Frequência de amostragem.
 Tb = 1  # Largura de cada símbolo (em seg).
 
-SNRdB = 0.01  # Potência do sinal é duas vezes o dobro da potência do ruído.
+SNRdB = 3  # Potência do sinal é duas vezes o dobro da potência do ruído.
 SNR = 10.0 ** (SNRdB/10.0)
 
 # Cria o modulador e o demodulador.
@@ -20,7 +21,7 @@ demodulador = Demodulador(modulador)
 canal = Canal(SNR)
 
 # Dados a serem enviados.
-dados = np.random.choice(np.array([0, 1]), size=(10000))
+dados = np.random.choice(np.array([0, 1]), size=(N))
 
 # Criando símbols para o BPSK (-1 e 1).
 simbolos_enviados = 2*dados - 1
@@ -32,9 +33,26 @@ simbolos_enviados = 2*dados - 1
 sinalc = canal.processar(sinalm)
 
 # Demodula o sinal recebido.
-(sinald, ondaq_recebida, simbolos_recebidos) = demodulador.processar(sinalc)
+(sinald,  sinali, ondaq_recebida, simbolos_recebidos) = demodulador.processar(sinalc)
 
-dados_recebidos = (dados + 1)/2
+dados_recebidos = simbolos_recebidos + 1
+
+ondaq_recebida = ondaq_recebida[int(modulador.L/2):modulador.L:1]
+
+# Calculando os erros de decisão.
+#erros = np.where(simbolos_enviados != simbolos_recebidos)
+
+#print(simbolos_enviados)
+#print(simbolos_recebidos)
+
+num_erros = np.sum(simbolos_enviados != simbolos_recebidos)
+
+BER = num_erros/simbolos_enviados.size
+
+print('Do total de {} bits, {} foram decodificados de formada errada.'.format(
+    simbolos_enviados.size, num_erros
+))
+print('BER: {}'.format(BER))
 
 '''
 # Exibindo gráficos do transmissor.
@@ -48,7 +66,6 @@ f1_ax3.plot(sinalm)
 f1_ax3.set_title('Sinal modulado')
 f1.subplots_adjust(hspace=1)
 
-
 # Exibindo gráficos do receptor.
 f2, (f2_ax1, f2_ax2, f2_ax3, f2_ax4, f2_ax5) = plt.subplots(5)
 f2.suptitle('Sinal recebido no receptor.', fontsize=14)
@@ -56,15 +73,12 @@ f2_ax1.plot(sinalc)
 f2_ax1.set_title('Sinal recebido do canal')
 f2_ax2.plot(sinald)
 f2_ax2.set_title('Sinal demodulado')
+f2_ax3.plot(sinali)
+f2_ax3.set_title('Sinal após integração')
 f2_ax4.plot(ondaq_recebida)
 f2_ax4.set_title('Onda quadrada recebida')
 f2_ax5.stem(dados_recebidos)
 f2_ax5.set_title('Dados recebidos')
 f2.subplots_adjust(hspace=1)
-
 plt.show()
 '''
-
-erros = np.where(simbolos_enviados != simbolos_recebidos)
-BER = np.size(erros)/ondaq_enviada.size
-print('BER: {}'.format(BER))
