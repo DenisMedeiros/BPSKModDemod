@@ -56,35 +56,57 @@ class Demodulador:
         ondaq[negativos] = -1
 
         # Faz uma subamostragem para obter os símbolos.
-        simbolos = ondaq[:ondaq.size - self.modulador.L:self.modulador.L]
+        simbolos = ondaq[::self.modulador.L]
 
         return (sinald, sinali, ondaq, simbolos)
 
 
 class Canal:
 
-    def __init__(self, SNR, taps):
+    def __init__(self, SNR, taps, Fd):
         self.SNR = SNR
         self.taps = taps
+        self.Fd = Fd
 
     def processar(self, sinal):
 
         # Sinal processado pelo canal, representado por h.
         #h = np.concatenate((np.zeros(5), rayleigh.rvs(size=10)))
 
-        # Rayleigh fading channel
-        #h = rayleigh.rvs(size=self.taps)/self.taps
-        #h = (1/np.sqrt(2)) * (np.random.randn(self.taps) + 1j * np.random.randn(self.taps))
-        #h = np.abs(h)
+        # Canal com desvanecimento (modelo de Jakes), para dist. de Rayleigh.
+        M = self.taps
+        K = sinal.size
+        sinalc = np.zeros(sinal.size)
 
-        # Canal com desvanecimento (modelo de Clarke)
-        x = np.zeros(sinal.size)
-        y = np.zeros(sinal.size)
+        for k in np.arange(1, K+1, 1):
 
-        for i in np.arange(1, )
+            hi = 0.0
+            hq = 0.0
 
-        #h = np.array([1])
-        sinalc = np.convolve(sinal, h)
+            alfa = 2 * np.random.rand() - np.pi
+            teta = 2 * np.random.rand() - np.pi
+            #beta = 2 * np.random.rand() - np.pi
+
+            for m in np.arange(1, M+1, 1):
+
+                #hi = hi + np.cos(2 * np.pi * self.Fd * np.cos(((2 * m - 1) * np.pi + teta) / (4 * M)) * k + alfa)
+                #hq = hq + np.sin(2 * np.pi * self.Fd * np.cos(((2 * m - 1) * np.pi + teta) / (4 * M)) * k + beta)
+                hi = hi + np.random.randn() * np.cos(2 * np.pi * self.Fd * k * np.cos(alfa) + teta)
+                hq = hq + np.random.randn() * np.sin(2 * np.pi * self.Fd * k * np.cos(alfa) + teta)
+
+
+            h = np.abs((1 / np.sqrt(M)) * (hi + 1j * hq))
+            sinalc[k-1] = sinal[k-1]*h
+
+        '''
+        for n in np.arange(0, sinal.size+1, 1):
+
+            alpha = 2*np.random.rand() - np.pi
+            phi = 2*np.random.rand() - np.pi
+
+            x = x + np.random.randn()*np.cos(2*pi*fd*np.cos(alpha) + phi)
+            y = y + np.random.randn()*np.sin(2 * pi * fd * np.cos(alpha) + phi)
+        '''
 
         # Aplicando ruído gaussiano branco.
         potencia_sinal = np.sum(np.square(sinalc))/sinalc.size
@@ -96,6 +118,8 @@ class Canal:
 
         # Aplica o ruído ao sinal.
         sinal_ruidoso = sinalc + ruido_gaussiano
+
+        print(sinal_ruidoso.size)
 
         # Atenua o sinal.
         return sinal_ruidoso

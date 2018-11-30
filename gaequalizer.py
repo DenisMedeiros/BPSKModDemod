@@ -8,19 +8,21 @@ from simulador import Modulador, Demodulador, Canal
 # Configurações.
 
 N = 10000  # Número de símbolos a ser enviado.
-Fc = 10  # Frequência da portadora.
-Fs = 10 * Fc  # Frequência de amostragem.
-Tb = 1  # Largura de cada símbolo (em seg).
+Fc = 100  # Frequência da portadora.
+Fs = 4 * Fc  # Frequência de amostragem.
+Tb = 0.1  # Largura de cada símbolo (em seg).
 
-SNRdB = 300  # Potência do sinal é duas vezes o dobro da potência do ruído.
+SNRdB = 100  # Potência do sinal é duas vezes o dobro da potência do ruído.
 SNR = 10.0 ** (SNRdB/10.0)
 
-TAPS = 80  # Número de elementos (caminhos) do canal.
+Fd = 5  # Frequência de Doppler para o canal de múltiplos caminhos.
+
+TAPS = 5  # Número de elementos (caminhos) do canal.
 
 # Cria o modulador e o demodulador.
 modulador = Modulador(Fc, Fs, Tb)
 demodulador = Demodulador(modulador)
-canal = Canal(SNR, TAPS)
+canal = Canal(SNR, TAPS, Fd)
 
 # Dados a serem enviados.
 dados = np.random.choice(np.array([0, 1]), size=(N))
@@ -39,9 +41,6 @@ sinalc = canal.processar(sinalm)
 
 dados_recebidos = ((simbolos_recebidos + 1)/2).astype(int)
 
-print(dados_recebidos)
-print(dados)
-
 # Calculando os erros de decisão.
 num_erros = np.sum(simbolos_enviados != simbolos_recebidos)
 BER = num_erros/simbolos_enviados.size
@@ -51,8 +50,8 @@ print('Do total de {} bits, {} foram decodificados de formada errada.'.format(
 ))
 print('BER: {}'.format(BER))
 
-# Exibindo gráficos do transmissor.
 '''
+# Exibindo gráficos do transmissor.
 f1, (f1_ax1, f1_ax2, f1_ax3) = plt.subplots(3)
 f1.suptitle('Sinal enviado a partir do transmissor', fontsize=14)
 f1_ax1.stem(dados)
