@@ -3,25 +3,44 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-from simulador import Modulador, Demodulador, Canal
+from simulador import ModuladorQAM, DemoduladorQAM, Canal
 
 # Configurações.
 
-N = 10000  # Número de símbolos a ser enviado.
-Fc = 100  # Frequência da portadora.
+N = 4  # Número de símbolos a ser enviado.
+Fc = 200  # Frequência da portadora.
 Fs = 4 * Fc  # Frequência de amostragem.
 Tb = 0.1  # Largura de cada símbolo (em seg).
 
 SNRdB = 100  # Potência do sinal é duas vezes o dobro da potência do ruído.
 SNR = 10.0 ** (SNRdB/10.0)
 
-Fd = 5  # Frequência de Doppler para o canal de múltiplos caminhos.
+Fd = 50  # Frequência de Doppler para o canal de múltiplos caminhos.
 
-TAPS = 5  # Número de elementos (caminhos) do canal.
+TAPS = 10  # Número de elementos (caminhos) do canal.
 
-# Cria o modulador e o demodulador.
-modulador = Modulador(Fc, Fs, Tb)
-demodulador = Demodulador(modulador)
+# Cria o modulador.
+#
+modulador = ModuladorQAM(baud=10, bpb=2, fc=50, fs=1000)
+demodulador = DemoduladorQAM(modulador)
+
+(ondaq, sinalm) = modulador.processar('00011011')
+
+(sinald, sinali, ondaq_recebida, simbolos) = demodulador.processar(sinalm)
+
+plt.figure(1)
+plt.plot(ondaq)
+plt.figure(2)
+plt.plot(sinald)
+plt.figure(3)
+plt.plot(ondaq_recebida)
+plt.figure(4)
+plt.plot(sinali)
+plt.show()
+
+
+'''
+
 canal = Canal(SNR, TAPS, Fd)
 
 # Dados a serem enviados.
@@ -50,7 +69,6 @@ print('Do total de {} bits, {} foram decodificados de formada errada.'.format(
 ))
 print('BER: {}'.format(BER))
 
-'''
 # Exibindo gráficos do transmissor.
 f1, (f1_ax1, f1_ax2, f1_ax3) = plt.subplots(3)
 f1.suptitle('Sinal enviado a partir do transmissor', fontsize=14)
