@@ -70,56 +70,17 @@ class Canal:
 
     def processar(self, sinal):
 
-        # Sinal processado pelo canal, representado por h.
-        #h = np.concatenate((np.zeros(5), rayleigh.rvs(size=10)))
-
-        # Canal com desvanecimento (modelo de Jakes), para dist. de Rayleigh.
-        M = self.taps
-        K = sinal.size
-        sinalc = np.zeros(sinal.size)
-
-        for k in np.arange(1, K+1, 1):
-
-            hi = 0.0
-            hq = 0.0
-
-            alfa = 2 * np.random.rand() - np.pi
-            teta = 2 * np.random.rand() - np.pi
-            #beta = 2 * np.random.rand() - np.pi
-
-            for m in np.arange(1, M+1, 1):
-
-                #hi = hi + np.cos(2 * np.pi * self.Fd * np.cos(((2 * m - 1) * np.pi + teta) / (4 * M)) * k + alfa)
-                #hq = hq + np.sin(2 * np.pi * self.Fd * np.cos(((2 * m - 1) * np.pi + teta) / (4 * M)) * k + beta)
-                hi = hi + np.random.randn() * np.cos(2 * np.pi * self.Fd * k * np.cos(alfa) + teta)
-                hq = hq + np.random.randn() * np.sin(2 * np.pi * self.Fd * k * np.cos(alfa) + teta)
-
-
-            h = np.abs((1 / np.sqrt(M)) * (hi + 1j * hq))
-            sinalc[k-1] = sinal[k-1]*h
-
-        '''
-        for n in np.arange(0, sinal.size+1, 1):
-
-            alpha = 2*np.random.rand() - np.pi
-            phi = 2*np.random.rand() - np.pi
-
-            x = x + np.random.randn()*np.cos(2*pi*fd*np.cos(alpha) + phi)
-            y = y + np.random.randn()*np.sin(2 * pi * fd * np.cos(alpha) + phi)
-        '''
 
         # Aplicando ruído gaussiano branco.
-        potencia_sinal = np.sum(np.square(sinalc))/sinalc.size
+        potencia_sinal = np.sum(np.square(sinal))/sinal.size
 
         # Gerando ruído gaussiano branco (média = 0, variancia = potencia do awgn).
         potencia_ruido = potencia_sinal / self.SNR
         desvio_padrao = np.sqrt(potencia_ruido)
-        ruido_gaussiano = np.random.normal(0, desvio_padrao, sinalc.size)
+        ruido_gaussiano = np.random.normal(0, desvio_padrao, sinal.size)
 
         # Aplica o ruído ao sinal.
-        sinal_ruidoso = sinalc + ruido_gaussiano
-
-        print(sinal_ruidoso.size)
+        sinal_ruidoso = sinal + ruido_gaussiano
 
         # Atenua o sinal.
         return sinal_ruidoso

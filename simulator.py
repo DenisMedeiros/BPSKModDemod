@@ -3,11 +3,11 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-from simulador import Modulador, Demodulador, Canal
+from comm import Modulador, Demodulador, Canal
 
 # Configurações.
 
-N = 10000  # Número de símbolos a ser enviado.
+N = 100  # Número de símbolos a ser enviado.
 Fc = 100  # Frequência da portadora.
 Fs = 4 * Fc  # Frequência de amostragem.
 Tb = 0.1  # Largura de cada símbolo (em seg).
@@ -50,7 +50,6 @@ print('Do total de {} bits, {} foram decodificados de formada errada.'.format(
 ))
 print('BER: {}'.format(BER))
 
-'''
 # Exibindo gráficos do transmissor.
 f1, (f1_ax1, f1_ax2, f1_ax3) = plt.subplots(3)
 f1.suptitle('Sinal enviado a partir do transmissor', fontsize=14)
@@ -77,4 +76,4 @@ f2_ax5.stem(dados_recebidos)
 f2_ax5.set_title('Dados recebidos')
 f2.subplots_adjust(hspace=1)
 plt.show()
-'''
+
